@@ -187,3 +187,7 @@ BlinkyHeadless/CPP/CppBlinkyStartup/Application/Generated Files/
 *.tlog
 PythonBlinkyServer/lib.zip/
 lib.zip/
+
+# NuGet 3.0 generated files
+project.lock.json
+SpeechTranslator/.vs/config/applicationhost.config

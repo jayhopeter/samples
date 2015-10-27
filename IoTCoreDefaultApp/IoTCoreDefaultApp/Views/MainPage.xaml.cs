@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using OnBoardee;
+using IoTOnboardingService;
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -10,7 +10,6 @@ using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
@@ -23,25 +22,38 @@ namespace IoTCoreDefaultApp
         private ConnectedDevicePresenter connectedDevicePresenter;
         private OnboardingService OnboardingService;
 
+            
         public MainPage()
         {
             this.InitializeComponent();
 
             MainPageDispatcher = Window.Current.Dispatcher;
 
-            UpdateBoardInfo();
-            UpdateNetworkInfo();
-            UpdateDateTime();
-            UpdateConnectedDevices();
-
             NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
 
-            timer = new DispatcherTimer();
-            timer.Tick += timer_Tick;
-            timer.Interval = TimeSpan.FromSeconds(30);
-            timer.Start();
-
             OnboardingService = new OnboardingService();
+
+            this.NavigationCacheMode = NavigationCacheMode.Enabled;
+
+            this.DataContext = LanguageManager.GetInstance();
+
+            this.Loaded += (sender, e) => 
+            {
+                UpdateBoardInfo();
+                UpdateNetworkInfo();
+                UpdateDateTime();
+                UpdateConnectedDevices();
+
+                timer = new DispatcherTimer();
+                timer.Tick += timer_Tick;
+                timer.Interval = TimeSpan.FromSeconds(30);
+                timer.Start();
+            };
+            this.Unloaded += (sender, e) =>
+            {
+                timer.Stop();
+                timer = null;
+            };
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -51,9 +63,7 @@ namespace IoTCoreDefaultApp
                 ApplicationData.Current.LocalSettings.Values[Constants.HasDoneOOBEKey] = Constants.HasDoneOOBEValue;
             }
 
-            Task.Run(() => {
-                OnboardingService.Initialize();
-            });
+            Task.Run(() => OnboardingService.Start());
 
             base.OnNavigatedTo(e);
         }
