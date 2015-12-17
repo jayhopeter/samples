@@ -10,22 +10,14 @@ SETLOCAL
 :: Variable setup
 ::
 :: Example:
-:: set installtype={Add | Update}
-:: set defaultappx=defappxname
-:: set defaultappxid=defaultappxid
-:: set dependencylist=depappx1name depappx2name
-:: set tempappx=tempappxname (optional)
-:: set tempappxid=tempappxid (optional)
+:: set defaultappx=defappxname (Name only. no need for .appx extension)
+:: set defaultappxid=defaultappxid  (You can find your app's id by checking your app's Package.appxmanifest)
+:: set dependencylist=depappx1name depappx2name (Name only. No need for .appx extension. You can delimit mutliple dependency appxs with a space.)
 :: ---------------------------------------------------------------------
-set installtype=Add 
-set defaultappx=MainAppx_1.0.0.0_Win32_Debug
-::set defaultappx=MainAppx_1.0.2.0_Win32_Debug
-set defaultappxid=bfa3eb48-79d5-4245-9bfe-6d2ffeef846d_q8jky9dv1tcdg!App
-set dependencylist=Microsoft.VCLibs.x86.Debug.14.00
-set tempappx=
-set tempappxid=
-::set tempappx=TempApp_1.0.0.0_Win32_Debug
-::set tempappxid=ae838b30-f72b-43f0-b5d3-7ea85a27df76_q8jky9dv1tcdg!App
+set defaultappx=MainAppx_1.0.0.0_x86
+set defaultappxid=7a11c6a0-d9a8-40cd-80cf-91d6a409edae_pft3qchy8afw0
+set dependencylist=Microsoft.VCLibs.x86.14.00 Microsoft.NET.Native.Runtime.1.1 Microsoft.NET.Native.Framework.1.2
+::set defaultappx=MainAppx_1.0.2.0_x86
 
 ::
 :: Add all dependency appx
@@ -46,12 +38,6 @@ for /F "skip=2 tokens=3" %%r in ('reg query "HKLM\Software\Microsoft\Windows NT\
 goto :INSTALLAPPX
 
 :SWITCH_TO_TEMP
-::
-:: If TempAppx exists Install It.
-::
-IF DEFINED tempappx (
-    goto :INSTALLTEMPAPPX
-)
 
 ::
 :: Switch to IOTUAPOOBE or DefaultApp
@@ -66,19 +52,6 @@ if %errorlevel%==0 (
     iotstartup.exe add headed DefaultApp_cw5n1h2txyewy!App
 )
 
-goto :INSTALLAPPX
-
-::
-:: Install TempAppx
-::
-:INSTALLTEMPAPPX
-echo installing temp appx
-mindeployappx /add /PackagePath:%~dp0%tempappx%.appx > %temp%\%tempappx%_result.txt
-
-::
-:: Switch to TempAppx
-::
-iotstartup.exe add headed %tempappxid%
 ping -n 4 localhost > nul:
 
 ::
@@ -98,7 +71,7 @@ goto :CLEANUP
 ::
 :: ------------------------------------------------------------------------------- 
 :CLEANUP
-echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Cleaning Up ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+echo Cleaning Up
 echo Exiting.
 popd
 ENDLOCAL
